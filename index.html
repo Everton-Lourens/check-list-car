@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071b83">
+  <title>Checklist do Veículo — JR Telecom (Modo de teste)</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="marca"><div class="marca-icone" aria-hidden="true">JR</div><div><strong>JR TELECOM</strong><span>Checklist do veículo</span></div></div>
+    <div class="selo-teste">MODO DE TESTE</div>
+  </header>
+  <section class="faixa-titulo"><div><h1>Checklist do veículo</h1><p>Fotos de teste carregadas da pasta public/ e selecionadas conforme o tipo de vistoria.</p></div></section>
+  <main id="app">
+    <div class="aviso"><strong>Ambiente de teste.</strong> As fotos pré-carregadas vêm da pasta <code>public/</code>. Os campos, as fotos selecionadas e a última assinatura ficam salvos neste navegador; esse cache não é compartilhado entre dispositivos.</div>
+    <section class="card">
+      <h2>Dados da vistoria</h2>
+      <div class="grade-campos">
+        <div><label for="veiculo">Veículo</label><select id="veiculo" required></select></div>
+        <div><label for="condutor">Condutor</label><select id="condutor" required></select></div>
+        <div><label for="pin">PIN do condutor (4 dígitos)</label><input id="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="off" required><small>Sem valor salvo, será usado o PIN definido em config.js.</small></div>
+        <div><label>Tipo</label><div class="seg tipo"><label><input type="radio" name="tipo" value="Entrada"><span>Entrada</span></label><label><input type="radio" name="tipo" value="Saída"><span>Saída</span></label></div></div>
+        <div><label for="km">Quilometragem</label><input id="km" type="number" inputmode="numeric" min="0" required></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="cabecalho-card"><h2>Checklist do veículo</h2><button class="btn sec" type="button" id="tudoC">✓ Tudo conforme (C)</button></div>
+      <p class="ajuda">As respostas e os demais campos são restaurados do cache; quando não houver valor salvo, vale a configuração de config.js.</p>
+      <div id="itens" class="lista-itens"></div>
+    </section>
+
+    <section class="card">
+      <h2>Selfie do condutor</h2>
+      <p class="ajuda">Uma selfie da pasta public/ é anexada automaticamente. Pode substituí-la por outra imagem; a escolha será salva no cache.</p>
+      <input type="file" id="selfie" accept="image/*" capture="user">
+      <div class="prev" id="prevSelfie"></div>
+    </section>
+
+    <section class="card">
+      <h2>Fotos do veículo</h2>
+      <p class="ajuda">Cinco fotos da pasta public/ são pré-selecionadas conforme o tipo: e- para Entrada e s- para Saída. Pode escolher outras fotos; a seleção ficará salva no cache.</p>
+      <input type="file" id="fotos" accept="image/*" multiple>
+      <div class="prev" id="prevFotos"></div>
+    </section>
+
+    <section class="card">
+      <h2>Observações</h2>
+      <label for="obs">Observação enviada ao servidor</label>
+      <textarea id="obs" maxlength="600"></textarea>
+      <div class="gps-notice"><strong>Localização:</strong> modo de teste estático. Nenhuma coordenada real será coletada; o envio, se o servidor aceitar, ficará identificado para conferência.</div>
+    </section>
+
+    <section class="card">
+      <h2>Assinatura</h2>
+      <p class="ajuda">A última assinatura fica salva neste navegador e será restaurada ao abrir novamente o checklist.</p>
+      <canvas id="assin" aria-label="Área de assinatura demonstrativa"></canvas>
+      <button class="btn sec" type="button" id="limpar">Limpar assinatura</button>
+    </section>
+
+    <div id="out" role="status" aria-live="polite"></div>
+    <button type="button" class="btn enviar" id="enviar">Enviar checklist</button>
+    <p class="rodape">Os dados ficam em cache neste navegador. O envio depende da ponte google.script.run, indisponível diretamente no GitHub Pages.</p>
+  </main>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
