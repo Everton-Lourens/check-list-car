@@ -219,12 +219,18 @@ async function serializarArquivos(files) {
 
 function dataUrlParaArquivo(registro) {
   if (!registro || typeof registro.dataUrl !== 'string' || !registro.dataUrl.startsWith('data:')) return null;
-  const [meta, conteudo] = registro.dataUrl.split(',', 2);
-  const mime = ((meta.match(/^data:([^;]+)/) || [])[1]) || registro.type || 'image/jpeg';
-  const binario = atob(conteudo || '');
-  const bytes = new Uint8Array(binario.length);
-  for (let i = 0; i < binario.length; i++) bytes[i] = binario.charCodeAt(i);
-  return new File([bytes], registro.name || 'foto-cache.jpeg', { type: mime, lastModified: registro.lastModified || Date.now() });
+  try {
+    const [meta, conteudo] = registro.dataUrl.split(',', 2);
+    if (!conteudo) return null;
+    const mime = ((meta.match(/^data:([^;]+)/) || [])[1]) || registro.type || 'image/jpeg';
+    const binario = atob(conteudo);
+    const bytes = new Uint8Array(binario.length);
+    for (let i = 0; i < binario.length; i++) bytes[i] = binario.charCodeAt(i);
+    return new File([bytes], registro.name || 'foto-cache.jpeg', { type: mime, lastModified: registro.lastModified || Date.now() });
+  } catch (_) {
+    // Um registro de cache danificado deve provocar o fallback para public/.
+    return null;
+  }
 }
 
 function previa(input, targetId, limit) {
@@ -262,52 +268,60 @@ function fotosConfiguradas(tipo) {
 async function restaurarFotos(tipo, permitirCache = true) {
   let arquivos = null;
   let origem = 'public';
+
   if (permitirCache) {
     const cache = await lerCache('fotos');
     if (cache && cache.tipo === tipo && Array.isArray(cache.files) && cache.files.length > 0) {
-      if (cache.origem === 'public') {
-        const prefixo = prefixoDoTipo(tipo);
-        const nomes = cache.files.map(item => typeof item === 'string' ? item : item.name).filter(nome => typeof nome === 'string');
-        if (nomes.length && nomes.every(nome => nome.startsWith(prefixo))) {
-          arquivos = await Promise.all(nomes.map(carregarArquivoPublico));
-          origem = 'public';
-        }
-      } else {
-        const registros = cache.files;
-        const convertidos = registros.map(item => dataUrlParaArquivo(item)).filter(Boolean);
-        if (convertidos.length) { arquivos = convertidos.slice(0, 6); origem = 'manual'; }
+      // O cache só é válido quando contém os dados reais das imagens, não apenas nomes.
+      // Isso também migra automaticamente os registros antigos para o formato completo.
+      const convertidos = cache.files.map(dataUrlParaArquivo);
+      if (convertidos.length && convertidos.every(Boolean)) {
+        arquivos = convertidos.slice(0, 6);
+        origem = cache.origem === 'public' ? 'public' : 'manual';
       }
     }
   }
+
+  // Sem imagens válidas no cache (ou ao trocar o tipo), carrega os padrões de ./public.
   if (!arquivos) {
     const nomes = fotosConfiguradas(tipo);
     arquivos = await Promise.all(nomes.map(carregarArquivoPublico));
     origem = 'public';
   }
+
   anexarArquivos($('fotos'), arquivos);
   previa($('fotos'), 'prevFotos', 6);
-  let registros;
-  if (origem === 'public') registros = arquivos.map(file => ({ name: file.name, source: 'public' }));
-  else registros = await serializarArquivos(arquivos);
+
+  // Guarda os bytes/base64 também para as fotos de ./public, permitindo cache-first real.
+  const registros = await serializarArquivos(arquivos);
   await gravarCache('fotos', { tipo, origem, files: registros });
 }
 
 async function restaurarSelfie() {
   const cache = await lerCache('selfie');
   let arquivos = null;
+  let origem = 'public';
+
   if (cache && Array.isArray(cache.files) && cache.files.length > 0) {
-    const convertidos = cache.files.map(dataUrlParaArquivo).filter(Boolean);
-    if (convertidos.length) arquivos = convertidos.slice(0, 1);
+    const convertidos = cache.files.map(dataUrlParaArquivo);
+    if (convertidos.length && convertidos.every(Boolean)) {
+      arquivos = convertidos.slice(0, 1);
+      origem = cache.origem === 'public' ? 'public' : 'manual';
+    }
   }
+
   if (!arquivos) arquivos = [await carregarArquivoPublico(CONFIG.defaults.selfieFoto)];
   anexarArquivos($('selfie'), arquivos);
   previa($('selfie'), 'prevSelfie', 1);
+
+  // A selfie padrão também passa a ser restaurada do cache nas próximas aberturas.
+  await gravarCache('selfie', { origem, files: await serializarArquivos(arquivos) });
 }
 
 async function persistirSelfie() {
   const files = arquivosDoInput($('selfie')).slice(0, 1);
   const records = await serializarArquivos(files);
-  await gravarCache('selfie', { files: records });
+  await gravarCache('selfie', { origem: 'manual', files: records });
 }
 
 function mostrarMensagem(text, tipo = 'err') {

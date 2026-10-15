@@ -2,9 +2,9 @@
 
 ## Estado atual
 
-Checklist estático responsivo em `index.html`, `styles.css`, `config.js` e `app.js`. O `config.js` é a fonte dos padrões configuráveis; quando um valor do cache está ausente ou é `null`, a interface volta ao padrão correspondente. O IndexedDB guarda os dados do formulário, respostas, fotos locais e assinatura; `localStorage` é contingência quando o IndexedDB não estiver disponível.
+Checklist estático responsivo em `index.html`, `styles.css`, `config.js` e `app.js`. O `config.js` é a fonte dos padrões configuráveis; quando um valor do cache está ausente ou é `null`, a interface volta ao padrão correspondente. O IndexedDB guarda os dados do formulário, respostas, fotos e assinatura; `localStorage` é contingência quando o IndexedDB não estiver disponível.
 
-As fotos de teste vêm de `public/`: `selfie-condutor.jpeg`, cinco arquivos `e-*.jpeg` para Entrada e cinco `s-*.jpeg` para Saída. Trocar o tipo troca automaticamente o conjunto de fotos pré-selecionadas. Fotos escolhidas manualmente e a última assinatura desenhada são persistidas no navegador.
+As fotos são restauradas primeiro do cache local quando os dados reais da imagem estão salvos. Se o cache de fotos estiver ausente, inválido, legado (só nomes) ou pertencer a outro tipo, a interface carrega as fotos configuradas em `public/` e salva seus dados no cache. Fotos padrão em cache são prioritárias sobre as versões nos arquivos públicos; atualizar uma imagem pública não substitui o cache existente naquele navegador. As fotos manuais também permanecem em cache. Os arquivos públicos incluem `selfie-condutor.jpeg`, cinco fotos `e-*.jpeg` para Entrada e cinco `s-*.jpeg` para Saída.
 
 A quilometragem é acrescida em 30 km por cada dia de calendário local transcorrido desde a data-base guardada no cache. O cache é local ao navegador/perfil e não sincroniza entre dispositivos.
 

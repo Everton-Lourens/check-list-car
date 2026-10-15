@@ -12,9 +12,9 @@
     <div class="marca"><div class="marca-icone" aria-hidden="true">JR</div><div><strong>JR TELECOM</strong><span>Checklist do veículo</span></div></div>
     <div class="selo-teste">MODO DE TESTE</div>
   </header>
-  <section class="faixa-titulo"><div><h1>Checklist do veículo</h1><p>Fotos de teste carregadas da pasta public/ e selecionadas conforme o tipo de vistoria.</p></div></section>
+  <section class="faixa-titulo"><div><h1>Checklist do veículo</h1><p>Fotos de teste restauradas do cache ou carregadas de public/ conforme necessário, de acordo com o tipo de vistoria.</p></div></section>
   <main id="app">
-    <div class="aviso"><strong>Ambiente de teste.</strong> As fotos pré-carregadas vêm da pasta <code>public/</code>. Os campos, as fotos selecionadas e a última assinatura ficam salvos neste navegador; esse cache não é compartilhado entre dispositivos.</div>
+    <div class="aviso"><strong>Ambiente de teste.</strong> As fotos são restauradas primeiro do cache local. Se não houver fotos válidas salvas para o tipo selecionado, os exemplos de <code>public/</code> serão carregados e armazenados no cache. Esse cache pertence a este navegador e não é compartilhado entre dispositivos.</div>
     <section class="card">
       <h2>Dados da vistoria</h2>
       <div class="grade-campos">
@@ -41,7 +41,7 @@
 
     <section class="card">
       <h2>Fotos do veículo</h2>
-      <p class="ajuda">Cinco fotos da pasta public/ são pré-selecionadas conforme o tipo: e- para Entrada e s- para Saída. Pode escolher outras fotos; a seleção ficará salva no cache.</p>
+      <p class="ajuda">Cinco fotos são pré-selecionadas conforme o tipo: e- para Entrada e s- para Saída. O cache de fotos tem prioridade; a pasta public/ é usada quando não há fotos válidas em cache. Pode escolher outras fotos; a seleção ficará salva no cache.</p>
       <input type="file" id="fotos" accept="image/*" multiple>
       <div class="prev" id="prevFotos"></div>
     </section>
